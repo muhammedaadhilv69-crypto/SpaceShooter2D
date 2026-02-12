@@ -1,0 +1,64 @@
+╔════════════════════════════════════════════════════════════════╗
+║              2D SPACE SHOOTER - QUICK REFERENCE                ║
+╚════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────┐
+│ CONTROLS                                                    │
+├─────────────────────────────────────────────────────────────┤
+│  ↑ ↓ ← →  or  W A S D    Move ship                          │
+│  SPACE                     Shoot                            │
+│  R                         Restart (after game over)        │
+│  ESC / Close Window        Quit                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ GAMEPLAY                                                    │
+├─────────────────────────────────────────────────────────────┤
+│  • Destroy red enemy ships                                  │
+│  • Avoid red bullets and collisions                         │
+│  • Each enemy is worth 10 points                            │
+│  • Game gets harder over time                               │
+│  • Try to beat your high score!                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ QUICK START - WINDOWS                                       │
+├─────────────────────────────────────────────────────────────┤
+│  1. Download SDL2 from libsdl.org                           │
+│  2. Extract SDL2 folder into game directory                 │
+│  3. Run build_mingw.bat (MinGW) or build_windows.bat (VS)   │
+│  4. Run SpaceShooter.exe                                    │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ QUICK START - LINUX                                         │
+├─────────────────────────────────────────────────────────────┤
+│  1. sudo apt-get install libsdl2-dev g++ make               │
+│  2. ./build_linux.sh                                        │
+│  3. ./SpaceShooter                                          │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ TIPS FOR HIGH SCORES                                        │
+├─────────────────────────────────────────────────────────────┤
+│  ✓ Keep moving constantly                                   │
+│  ✓ Shoot continuously (spam that spacebar!)                 │
+│  ✓ Destroy enemies before they shoot                        │
+│  ✓ Use the entire screen space                              │
+│  ✓ Don't get cornered                                       │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ FILES INCLUDED                                              │
+├─────────────────────────────────────────────────────────────┤
+│  main.cpp, Game.cpp, Game.h  - Source code                  │
+│  Makefile, CMakeLists.txt    - Build files                  │
+│  build_*.bat, build_*.sh     - Build scripts                │
+│  README.md                   - Full documentation           │
+│  SETUP.txt                   - Setup instructions           │
+│  DESIGN.md                   - Technical details            │
+└─────────────────────────────────────────────────────────────┘
+
+For detailed instructions, see README.md or SETUP.txt
+
+Have fun and good luck!

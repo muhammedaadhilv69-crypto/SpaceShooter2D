@@ -1,0 +1,88 @@
+# QUICK SETUP GUIDE
+
+## For Windows Users (Easiest Method)
+
+### Step 1: Download SDL2
+1. Go to https://www.libsdl.org/download-2.0.php
+2. Download **SDL2-devel-2.x.x-mingw.tar.gz** (for MinGW) or **SDL2-devel-2.x.x-VC.zip** (for Visual Studio)
+3. Extract the downloaded file
+4. Rename the extracted folder to "SDL2"
+5. Move the SDL2 folder into this game directory (next to main.cpp, Game.h, etc.)
+
+### Step 2: Install Compiler (if you don't have one)
+
+**Option A: MinGW (Recommended - Simpler)**
+1. Download from: https://sourceforge.net/projects/mingw-w64/
+2. Install it
+3. Add MinGW bin folder to your system PATH
+
+**Option B: Visual Studio**
+1. Download Visual Studio Community (free) from Microsoft
+2. During installation, select "Desktop development with C++"
+
+### Step 3: Build the Game
+
+**For MinGW:**
+- Double-click `build_mingw.bat`
+
+**For Visual Studio:**
+- Open "Developer Command Prompt for VS"
+- Navigate to this folder
+- Run `build_windows.bat`
+
+### Step 4: Play!
+- Run `SpaceShooter.exe`
+
+---
+
+## For Linux Users
+
+### Step 1: Install Dependencies
+```bash
+# Ubuntu/Debian
+sudo apt-get install libsdl2-dev g++ make
+
+# Fedora
+sudo dnf install SDL2-devel gcc-c++ make
+
+# Arch
+sudo pacman -S sdl2 gcc make
+```
+
+### Step 2: Build
+```bash
+chmod +x build_linux.sh
+./build_linux.sh
+```
+
+### Step 3: Play!
+```bash
+./SpaceShooter
+```
+
+---
+
+## Verification
+
+Your directory should look like this after downloading SDL2:
+
+```
+2d_shooter_game/
+├── main.cpp
+├── Game.h
+├── Game.cpp
+├── build_mingw.bat (or build_windows.bat)
+├── SDL2/
+│   ├── include/
+│   │   └── SDL2/
+│   │       └── SDL.h (and other headers)
+│   └── lib/
+│       └── x64/
+│           ├── SDL2.lib (or libSDL2.a for MinGW)
+│           ├── SDL2main.lib (or libSDL2main.a)
+│           └── SDL2.dll
+```
+
+## Need Help?
+
+Check README.md for detailed instructions and troubleshooting.
