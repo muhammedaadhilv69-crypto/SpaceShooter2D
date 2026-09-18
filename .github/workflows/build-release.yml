@@ -1,0 +1,146 @@
+name: Build & Release SpaceShooter2D
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x64
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: Shooter2D
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+          version: 12.2.0
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euxo pipefail
+          g++ -std=c++14 -O2 \
+            -I./SDL2/include \
+            -L./SDL2/lib \
+            main.cpp Game.cpp \
+            -o SpaceShooter.exe \
+            -lmingw32 -lSDL2main -lSDL2 \
+            -static-libgcc -static-libstdc++ \
+            -mwindows
+
+      - name: Verify build output
+        shell: powershell
+        run: |
+          if (!(Test-Path "SpaceShooter.exe")) { throw "SpaceShooter.exe was not produced." }
+          if (!(Test-Path "SDL2\bin\SDL2.dll")) { throw "SDL2.dll was not found." }
+
+      - name: Package Windows release
+        shell: powershell
+        run: |
+          $dist = "..\dist\SpaceShooter2D-windows-x64"
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+          Copy-Item "SpaceShooter.exe" "$dist\"
+          Copy-Item "SDL2\bin\SDL2.dll" "$dist\"
+          Copy-Item "README.md" "$dist\"
+          if (Test-Path "LICENSE") { Copy-Item "LICENSE" "$dist\" }
+          Compress-Archive -Path "$dist\*" -DestinationPath "..\SpaceShooter2D-windows-x64.zip" -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpaceShooter2D-windows-x64
+          path: SpaceShooter2D-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  build-linux:
+    name: Build Linux x64
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Shooter2D
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libsdl2-dev
+
+      - name: Build
+        run: |
+          make clean || true
+          make
+
+      - name: Verify build output
+        run: test -f SpaceShooter
+
+      - name: Package Linux release
+        run: |
+          set -euxo pipefail
+          mkdir -p ../dist/SpaceShooter2D-linux-x64
+          cp SpaceShooter ../dist/SpaceShooter2D-linux-x64/
+          cp README.md ../dist/SpaceShooter2D-linux-x64/
+          if [ -f LICENSE ]; then cp LICENSE ../dist/SpaceShooter2D-linux-x64/; fi
+          cd ../dist
+          zip -r ../SpaceShooter2D-linux-x64.zip SpaceShooter2D-linux-x64
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpaceShooter2D-linux-x64
+          path: SpaceShooter2D-linux-x64.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - build-windows
+      - build-linux
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SpaceShooter2D-windows-x64
+          path: release-assets
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SpaceShooter2D-linux-x64
+          path: release-assets
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/SpaceShooter2D-windows-x64.zip
+            release-assets/SpaceShooter2D-linux-x64.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
