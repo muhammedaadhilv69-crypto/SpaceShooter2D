@@ -118,7 +118,7 @@ jobs:
     needs:
       - build-windows
       - build-linux
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -137,6 +137,8 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('v0.1.{0}', github.run_number) }}
+          target_commitish: ${{ github.sha }}
           files: |
             release-assets/SpaceShooter2D-windows-x64.zip
             release-assets/SpaceShooter2D-linux-x64.zip
