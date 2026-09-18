@@ -1,0 +1,129 @@
+name: Build and release SpaceShooter2D
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Linux build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Shooter2D
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential make g++ libsdl2-dev zip
+
+      - name: Build Linux binary
+        run: |
+          make clean || true
+          make
+
+      - name: Package Linux artifact
+        run: |
+          set -eux
+          mkdir -p ../dist-linux
+          cp SpaceShooter ../dist-linux/
+          cp README.md ../dist-linux/
+          cp LICENSE ../dist-linux/ 2>/dev/null || true
+          cd ..
+          zip -r SpaceShooter2D-linux-x64.zip dist-linux
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpaceShooter2D-linux-x64
+          path: SpaceShooter2D-linux-x64.zip
+          if-no-files-found: error
+
+  build-windows:
+    name: Windows build
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: Shooter2D
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          version: 12.2.0
+
+      - name: Build Windows binary
+        shell: bash
+        run: |
+          set -euxo pipefail
+          g++ -std=c++14 -O2 \
+            -I./SDL2/include \
+            -L./SDL2/lib \
+            main.cpp Game.cpp \
+            -o SpaceShooter.exe \
+            -lmingw32 -lSDL2main -lSDL2 -mwindows
+
+      - name: Package Windows artifact
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path ..\dist-windows | Out-Null
+          Copy-Item "SpaceShooter.exe" "..\dist-windows\"
+          Copy-Item "SDL2\bin\SDL2.dll" "..\dist-windows\"
+          Copy-Item "README.md" "..\dist-windows\"
+          if (Test-Path "LICENSE") { Copy-Item "LICENSE" "..\dist-windows\" }
+          Compress-Archive -Path ..\dist-windows\* -DestinationPath ..\SpaceShooter2D-windows-x64.zip -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpaceShooter2D-windows-x64
+          path: SpaceShooter2D-windows-x64.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish release assets
+    needs:
+      - build-linux
+      - build-windows
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SpaceShooter2D-linux-x64
+          path: release-assets
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SpaceShooter2D-windows-x64
+          path: release-assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/SpaceShooter2D-linux-x64.zip
+            release-assets/SpaceShooter2D-windows-x64.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true
