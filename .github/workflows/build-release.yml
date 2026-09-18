@@ -37,7 +37,7 @@ jobs:
         run: |
           set -euxo pipefail
           g++ -std=c++14 -O2 \
-            -I./SDL2/include \
+            -I./SDL2/include/SDL2 \
             -L./SDL2/lib \
             main.cpp Game.cpp \
             -o SpaceShooter.exe \
@@ -85,12 +85,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential libsdl2-dev
+            build-essential pkg-config libsdl2-dev
 
       - name: Build
         run: |
           make clean || true
-          make
+          make CXXFLAGS="-std=c++14 -Wall -O2 $(pkg-config --cflags sdl2)" LDFLAGS="$(pkg-config --libs sdl2) -lm"
 
       - name: Verify build output
         run: test -f SpaceShooter
